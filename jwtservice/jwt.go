@@ -33,9 +33,6 @@ func Parse(authorizationHeader string) (jwt.MapClaims, error) {
 		return res, errors.New("Error in authorization token")
 	}
 
-	//claims0, ok0 := token.Claims.(jwt.MapClaims)
-	//fmt.Println(claims0, ok0)
-
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		res = claims
 	} else {
