@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -53,6 +54,7 @@ func GetEnv() string {
 	if envVal == "" {
 		envVal = "prod"
 	}
+	log.Println("Enviroment:", envVal)
 	return envVal
 }
 
