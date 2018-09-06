@@ -14,9 +14,8 @@ type testpair struct {
 var tests = []testpair{
 	{"db-uri-template", "postgres://%s:%s@localhost:5433/goapisql_db_test?sslmode=disable"},
 	{"db-anon-role", "web_anon"},
-	{"db-default-role-password", "hu8jmn3"},
-	{"server-port", "3000"},
-	{"jwtservice-secret", "G0naHHmCgbbLPoK4rdTnGhl30B3VKBkD"},
+	{"server-port", "9595"},
+	{"jwt-secret", "G0naHHmCgbbfgfgUUUbvlaztyrOpppQ"},
 }
 
 func BenchmarkGetEnv(b *testing.B) {
