@@ -94,7 +94,7 @@ func TestGetQueryResult3(t *testing.T) {
 
 func dropTable(tableName string) {
 	dbTest := config.GetDbConnection("postgres")
-	sqlStatement := fmt.Sprintf(`DROP TABLE %s;`, tableName)
+	sqlStatement := fmt.Sprintf(`DROP TABLE IF EXISTS %s;`, tableName)
 	_, err := dbTest.Exec(sqlStatement)
 	if err != nil {
 		panic(err)
