@@ -13,6 +13,7 @@ const (
 	keyJwtSecret = "jwt-secret"
 )
 
+//Parse Authorization Header and retrieves jwt.MapClaims
 func Parse(authorizationHeader string) (jwt.MapClaims, error) {
 	var res jwt.MapClaims
 	if !strings.HasPrefix(authorizationHeader, prefixToken) {

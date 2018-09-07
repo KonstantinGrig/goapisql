@@ -9,5 +9,5 @@ import (
 func main() {
 	config.Init()
 	port := config.GetString("server-port")
-	fasthttp.ListenAndServe(":"+port, handlers.SqlHandler)
+	fasthttp.ListenAndServe(":"+port, handlers.SQLHandler)
 }

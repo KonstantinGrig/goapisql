@@ -47,7 +47,7 @@ func TestSqlHandlerJwtTokenOk(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 	port := 1234
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -77,7 +77,7 @@ func TestSqlHandlerJwtTokenOk(t *testing.T) {
 func TestSqlHandlerJwtTokenExpire(t *testing.T) {
 	setUp()
 	port := 1235
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -103,7 +103,7 @@ func TestSqlHandlerJwtTokenExpire(t *testing.T) {
 func TestSqlHandlerJwtTokenNoRole(t *testing.T) {
 	setUp()
 	port := 1236
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -129,7 +129,7 @@ func TestSqlHandlerJwtTokenNoRole(t *testing.T) {
 func TestSqlHandlerJwtTokenUnexpectedSigningMethod(t *testing.T) {
 	setUp()
 	port := 1237
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -155,7 +155,7 @@ func TestSqlHandlerJwtTokenUnexpectedSigningMethod(t *testing.T) {
 func TestSqlHandlerJwtTokenShouldBePrefixBearer(t *testing.T) {
 	setUp()
 	port := 1238
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -181,7 +181,7 @@ func TestSqlHandlerJwtTokenShouldBePrefixBearer(t *testing.T) {
 func TestSqlHandlerJwtTokenError(t *testing.T) {
 	setUp()
 	port := 1239
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -207,7 +207,7 @@ func TestSqlHandlerJwtTokenError(t *testing.T) {
 func TestSqlHandlerSQLError(t *testing.T) {
 	setUp()
 	port := 1240
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "ERROR SQL STRING"
 	body := strings.NewReader(sqlSting)
@@ -233,7 +233,7 @@ func TestSqlHandlerSQLError(t *testing.T) {
 func TestSqlHandlerErrorOnlyPost(t *testing.T) {
 	setUp()
 	port := 1241
-	defer startServerOnPort(t, port, SqlHandler).Close()
+	defer startServerOnPort(t, port, SQLHandler).Close()
 
 	sqlSting := "ERROR SQL STRING"
 	body := strings.NewReader(sqlSting)

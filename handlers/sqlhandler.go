@@ -10,7 +10,8 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func SqlHandler(ctx *fasthttp.RequestCtx) {
+//SQLHandler the function processes the SQL request coming from the body of the request post
+func SQLHandler(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Header.Method()) == "POST" {
 		authorizationHeader := string(ctx.Request.Header.Peek("Authorization"))
 		claims, err := jwtservice.Parse(authorizationHeader)

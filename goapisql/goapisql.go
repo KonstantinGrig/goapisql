@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 )
 
+//GetQueryResult retrieves JSON result from DB or error
 func GetQueryResult(db *sql.DB, sql string) (string, error) {
 	var resString string
 	tx, errBeginTx := db.Begin()
