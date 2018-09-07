@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	//Import the PostgreSQL driver
 	_ "github.com/lib/pq"
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
@@ -13,17 +14,19 @@ import (
 )
 
 var once sync.Once
-var GoapisqlCache *cache.Cache
+var goapisqlCache *cache.Cache
 
 const (
 	configName       = "config"
 	configType       = "json"
 	keyDbUsers       = "db_users"
-	keyDbUriTemplate = "db-uri-template"
+	keyDbURITemplate = "db-uri-template"
 	keyPassword      = "password"
 	dbDriverName     = "postgres"
 )
 
+//Init config file
+//default file name "config.json"
 func Init() {
 	viper.SetConfigName(configName)
 	viper.SetConfigType(configType)
@@ -31,24 +34,27 @@ func Init() {
 	viper.AddConfigPath("..")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 }
 
+//GetCache retrieves the *cache.Cache for your Application
 func GetCache() *cache.Cache {
 	once.Do(func() {
-		GoapisqlCache = cache.New(5*time.Minute, 10*time.Minute)
+		goapisqlCache = cache.New(5*time.Minute, 10*time.Minute)
 	})
 
 	isFlushCache := os.Getenv("GOAPISQL_IS_CACHE_FLUSH")
 	if isFlushCache == "yes" {
-		GoapisqlCache.Flush()
+		goapisqlCache.Flush()
 		os.Setenv("GOAPISQL_IS_CACHE_FLUSH", "no")
 	}
 
-	return GoapisqlCache
+	return goapisqlCache
 }
 
+//GetEnv retrieves the name of current environment
+//default "prod"
 func GetEnv() string {
 	envVal := os.Getenv("GOAPISQL_ENV")
 	if envVal == "" {
@@ -58,10 +64,13 @@ func GetEnv() string {
 	return envVal
 }
 
+//GetNoCachedString returns without cache the value associated with the key as a string.
 func GetNoCachedString(key string) string {
 	return viper.GetString(GetEnv() + "." + key)
 }
 
+//GetString retrieves the string value of the config variable named by the key.
+//If string value have in cache then retrieves from cache
 func GetString(key string) string {
 	var res string
 	cacheApp := GetCache()
@@ -76,6 +85,9 @@ func GetString(key string) string {
 	return res
 }
 
+//GetNoCachedDbUsers retrieves map with iformation about DB user.
+//example: map{postgres: {name: postgres, password: postgres_user_password}}
+//Cache doesn't use
 func GetNoCachedDbUsers() map[string]map[string]string {
 	resSlice := map[string]map[string]string{}
 	var userName string
@@ -95,6 +107,9 @@ func GetNoCachedDbUsers() map[string]map[string]string {
 	return resSlice
 }
 
+//GetDbUsers retrieves map with iformation about DB user.
+//example: map{postgres: {name: postgres, password: postgres_user_password}}
+//Cache use
 func GetDbUsers() map[string]map[string]string {
 	var res map[string]map[string]string
 	cacheApp := GetCache()
@@ -108,9 +123,11 @@ func GetDbUsers() map[string]map[string]string {
 	return res
 }
 
+//GetNoCachedDbConnection retrieves *sql.DB
+//Cache doesn't use
 func GetNoCachedDbConnection(name string) *sql.DB {
 	dbUsers := GetNoCachedDbUsers()
-	connStr := fmt.Sprintf(GetNoCachedString(keyDbUriTemplate), name, dbUsers[name][keyPassword])
+	connStr := fmt.Sprintf(GetNoCachedString(keyDbURITemplate), name, dbUsers[name][keyPassword])
 	db, err := sql.Open(dbDriverName, connStr)
 	if err != nil {
 		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
@@ -126,6 +143,8 @@ func GetNoCachedDbConnection(name string) *sql.DB {
 	return db
 }
 
+//GetDbConnection retrieves *sql.DB
+//Cache use
 func GetDbConnection(name string) *sql.DB {
 	var res *sql.DB
 	var keyDbConnection = "db_connection_" + name
