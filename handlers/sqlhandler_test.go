@@ -279,9 +279,6 @@ func TestSqlHandlerRoleManagerOk(t *testing.T) {
 	responseBody, _ := ioutil.ReadAll(resp.Body)
 	responseString := string(responseBody)
 
-	t.Log(resp.StatusCode)
-	t.Log(responseString)
-
 	if resp.StatusCode != 200 {
 		t.Error("The response should be", 200)
 	}
