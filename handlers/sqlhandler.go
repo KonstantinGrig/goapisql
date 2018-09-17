@@ -5,8 +5,6 @@ import (
 	"github.com/KonstantinGrig/goapisql/config"
 	"github.com/KonstantinGrig/goapisql/goapisql"
 	"github.com/KonstantinGrig/goapisql/jwtservice"
-
-	//"github.com/dgrijalva/jwt-go"
 	"github.com/valyala/fasthttp"
 )
 
