@@ -22,6 +22,7 @@ const (
 	jwtTokenExpire                  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMiLCJleHAiOjE1MTYyMzkwMjJ9.5VyMx5na1V0K1EUBGyCqtkWvgD9Wu9Y95AYDUgwbg18"
 	jwtTokenNoRole                  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.bqD_RIUSIOZlw38SKhrWqrM66dBXWGDAeF-IV62Qb0s"
 	jwtTokenUnexpectedSigningMethod = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.Xbjh8W6mUQkhEWpMcVZ9PYKk_ezPn9eYHxlfm1_sEC9xCjUzhmCPh9BcHwTEGW5ThvfeMxI3Bdtj-NRAg3DMjA"
+	jwtTokenManagerOk               = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciJ9.ZoX_-0IAZAMptGP8r9VAZ9VISChfq-hWJfxsM6fCez4"
 )
 
 func setUp() {
@@ -36,6 +37,8 @@ func setUp() {
 	if isFirst {
 		dropTable("customer")
 		createTableCustomer()
+		dbTest.Exec("DROP ROLE IF EXISTS manager;")
+		dbTest.Exec("CREATE USER manager WITH PASSWORD 'pw' LOGIN;")
 	} else {
 		dbTest.Exec("DELETE FROM customer;")
 		dbTest.Exec("ALTER SEQUENCE customer_id_seq RESTART WITH 1;")
@@ -251,6 +254,143 @@ func TestSqlHandlerErrorOnlyPost(t *testing.T) {
 		t.Error("The response should be", 400)
 	}
 	val := "Only Post method allowed"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+}
+
+func TestSqlHandlerRoleManagerOk(t *testing.T) {
+	setUp()
+	dbTest.Exec("GRANT SELECT ON customer TO manager;")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
+	port := 1242
+	defer startServerOnPort(t, port, SQLHandler).Close()
+
+	sqlSting := "SELECT * FROM customer"
+	body := strings.NewReader(sqlSting)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://localhost:"+strconv.Itoa(port), body)
+	req.Header.Set("Authorization", "Bearer "+jwtTokenManagerOk)
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	responseBody, _ := ioutil.ReadAll(resp.Body)
+	responseString := string(responseBody)
+
+	t.Log(resp.StatusCode)
+	t.Log(responseString)
+
+	if resp.StatusCode != 200 {
+		t.Error("The response should be", 200)
+	}
+	val := "Konstantin"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+	val = "Oksana"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+}
+
+func TestSqlHandlerRoleManagerPermissionDeniedSELECT(t *testing.T) {
+	setUp()
+	dbTest.Exec("REVOKE SELECT, UPDATE, INSERT ON customer FROM manager;")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
+	port := 1243
+	defer startServerOnPort(t, port, SQLHandler).Close()
+
+	sqlSting := "SELECT * FROM customer"
+	body := strings.NewReader(sqlSting)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://localhost:"+strconv.Itoa(port), body)
+	req.Header.Set("Authorization", "Bearer "+jwtTokenManagerOk)
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	responseBody, _ := ioutil.ReadAll(resp.Body)
+	responseString := string(responseBody)
+
+	if resp.StatusCode != 400 {
+		t.Error("The response should be", 400)
+	}
+	val := "permission denied"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+}
+
+func TestSqlHandlerRoleManagerPermissionDeniedINSERT(t *testing.T) {
+	setUp()
+	dbTest.Exec("REVOKE SELECT, UPDATE, INSERT ON customer FROM manager;")
+	dbTest.Exec("GRANT SELECT, UPDATE ON customer TO manager;")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
+	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
+	port := 1244
+	defer startServerOnPort(t, port, SQLHandler).Close()
+
+	sqlSting := "SELECT * FROM customer"
+	body := strings.NewReader(sqlSting)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://localhost:"+strconv.Itoa(port), body)
+	req.Header.Set("Authorization", "Bearer "+jwtTokenManagerOk)
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	responseBody, _ := ioutil.ReadAll(resp.Body)
+	responseString := string(responseBody)
+
+	if resp.StatusCode != 200 {
+		t.Error("The response should be", 200)
+	}
+	val := "Konstantin"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+	val = "Oksana"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+
+	sqlSting = "UPDATE customer SET age = 35 WHERE first_name = 'Konstantin' RETURNING *;"
+	body = strings.NewReader(sqlSting)
+
+	client = &http.Client{}
+	req, _ = http.NewRequest("POST", "http://localhost:"+strconv.Itoa(port), body)
+	req.Header.Set("Authorization", "Bearer "+jwtTokenManagerOk)
+	resp, _ = client.Do(req)
+
+	responseBody, _ = ioutil.ReadAll(resp.Body)
+	responseString = string(responseBody)
+
+	if resp.StatusCode != 200 {
+		t.Error("The response should be", 200)
+	}
+	val = ":35,"
+	if !strings.Contains(responseString, val) {
+		t.Error("The string should to contains", val)
+	}
+
+	sqlSting = "INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)"
+	body = strings.NewReader(sqlSting)
+
+	client = &http.Client{}
+	req, _ = http.NewRequest("POST", "http://localhost:"+strconv.Itoa(port), body)
+	req.Header.Set("Authorization", "Bearer "+jwtTokenManagerOk)
+	resp, _ = client.Do(req)
+
+	responseBody, _ = ioutil.ReadAll(resp.Body)
+	responseString = string(responseBody)
+
+	if resp.StatusCode != 400 {
+		t.Error("The response should be", 400)
+	}
+	val = "permission denied"
 	if !strings.Contains(responseString, val) {
 		t.Error("The string should to contains", val)
 	}
