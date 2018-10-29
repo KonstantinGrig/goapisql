@@ -17,21 +17,17 @@ var once sync.Once
 var goapisqlCache *cache.Cache
 
 const (
-	configName       = "config"
-	configType       = "json"
-	keyDbUsers       = "db_users"
-	keyDbURITemplate = "db-uri-template"
-	keyPassword      = "password"
-	dbDriverName     = "postgres"
+	KEY_DB_USERS        = "db_users"
+	KEY_DB_URI_TEMPLATE = "db-uri-template"
+	KEY_PASSWORD        = "password"
+	KEY_JWT_SECRET      = "jwt-secret"
+	PREFIX_TOKEN        = "Bearer "
+	DB_DRIVER_NAME      = "postgres"
 )
 
-//Init config file
-//default file name "config.json"
-func Init() {
-	viper.SetConfigName(configName)
-	viper.SetConfigType(configType)
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("..")
+//Init config file from the config paths
+func InitConfigFile(path string) {
+	viper.SetConfigFile(path)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %s", err))
@@ -91,7 +87,7 @@ func GetString(key string) string {
 func GetNoCachedDbUsers() map[string]map[string]string {
 	resSlice := map[string]map[string]string{}
 	var userName string
-	resInterface := viper.Get(GetEnv() + "." + keyDbUsers).([]interface{})
+	resInterface := viper.Get(GetEnv() + "." + KEY_DB_USERS).([]interface{})
 	for _, item := range resInterface {
 		itemTyped := item.(map[string]interface{})
 		resMap := map[string]string{}
@@ -113,12 +109,12 @@ func GetNoCachedDbUsers() map[string]map[string]string {
 func GetDbUsers() map[string]map[string]string {
 	var res map[string]map[string]string
 	cacheApp := GetCache()
-	resFromCache, ok := cacheApp.Get(keyDbUsers)
+	resFromCache, ok := cacheApp.Get(KEY_DB_USERS)
 	if ok {
 		res = resFromCache.(map[string]map[string]string)
 	} else {
 		res = GetNoCachedDbUsers()
-		cacheApp.Set(keyDbUsers, res, cache.NoExpiration)
+		cacheApp.Set(KEY_DB_USERS, res, cache.NoExpiration)
 	}
 	return res
 }
@@ -127,8 +123,8 @@ func GetDbUsers() map[string]map[string]string {
 //Cache doesn't use
 func GetNoCachedDbConnection(name string) *sql.DB {
 	dbUsers := GetNoCachedDbUsers()
-	connStr := fmt.Sprintf(GetNoCachedString(keyDbURITemplate), name, dbUsers[name][keyPassword])
-	db, err := sql.Open(dbDriverName, connStr)
+	connStr := fmt.Sprintf(GetNoCachedString(KEY_DB_URI_TEMPLATE), name, dbUsers[name][KEY_PASSWORD])
+	db, err := sql.Open(DB_DRIVER_NAME, connStr)
 	if err != nil {
 		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
 	}

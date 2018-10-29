@@ -27,7 +27,7 @@ func BenchmarkGetEnv(b *testing.B) {
 
 func TestGetNoCachedString(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 
 	for _, pair := range tests {
 		actual := GetNoCachedString(pair.key)
@@ -40,7 +40,7 @@ func TestGetNoCachedString(t *testing.T) {
 
 func TestGetString(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 
 	for _, pair := range tests {
 		actual := GetString(pair.key)
@@ -56,13 +56,13 @@ func TestGetString(t *testing.T) {
 
 func TestGetNoCachedDbUsers(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 	GetNoCachedDbUsers()
 }
 
 func TestGetDbUsers(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 	GetNoCachedDbUsers()
 	GetDbUsers()
 	GetDbUsers()
@@ -72,15 +72,22 @@ func TestGetDbUsers(t *testing.T) {
 
 func TestGetNoCachedDbConnection(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 	GetNoCachedDbConnection("postgres")
 }
 
 func TestGetDbConnection(t *testing.T) {
 	os.Setenv("GOAPISQL_ENV", "test")
-	Init()
+	InitConfigFile("../config.json")
 	GetDbConnection("postgres")
 	GetDbConnection("postgres")
 	GetDbConnection("postgres")
 	GetDbConnection("postgres")
+}
+
+func TestInitConfigFile(t *testing.T) {
+	os.Setenv("GOAPISQL_ENV", "test")
+	InitConfigFile("../config.json")
+	str := GetNoCachedString("server-port")
+	t.Log(str)
 }

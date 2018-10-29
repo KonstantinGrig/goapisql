@@ -6,37 +6,44 @@ import (
 )
 
 //GetQueryResult retrieves JSON result from DB or error
-func GetQueryResult(db *sql.DB, sql string) (string, error) {
-	var resString string
+func GetQueryResult(db *sql.DB, sql string) ([]byte, error) {
 	tx, errBeginTx := db.Begin()
-	defer tx.Commit()
 	if errBeginTx != nil {
-		return resString, errBeginTx
+		return nil, errBeginTx
 	}
 
 	res := []map[string]interface{}{}
 
 	rows, err := tx.Query(sql)
 	if err != nil {
-		return resString, err
+		return nil, err
 	}
 
 	for rows.Next() {
 		columns, err := rows.Columns()
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		var scanValues, rowMap = getEmptyRow(columns)
-		rows.Scan(scanValues...)
+		err = rows.Scan(scanValues...)
+		if err != nil {
+			return nil, err
+		}
 		res = append(res, rowMap)
 	}
-	rows.Close()
+	err = rows.Close()
+	if err != nil {
+		return nil, err
+	}
 	resByte, err := json.Marshal(res)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	resString = string(resByte)
-	return resString, nil
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+	return resByte, nil
 }
 
 func getEmptyRow(sliceFieldNames []string) ([]interface{}, map[string]interface{}) {

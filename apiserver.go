@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	config.Init()
+	config.InitConfigFile("./config.json")
 	port := config.GetString("server-port")
-	fasthttp.ListenAndServe(":"+port, handlers.SQLHandler)
+	fasthttp.ListenAndServe(":"+port, handlers.FastHttpHandler)
 }

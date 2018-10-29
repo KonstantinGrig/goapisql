@@ -30,7 +30,7 @@ func setUp() {
 	if dbTest == nil {
 		isFirst = true
 		os.Setenv("GOAPISQL_ENV", "test")
-		config.Init()
+		config.InitConfigFile("../config.json")
 		dbTest = config.GetDbConnection("postgres")
 	}
 
@@ -50,7 +50,7 @@ func TestSqlHandlerJwtTokenOk(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 	port := 1234
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -80,7 +80,7 @@ func TestSqlHandlerJwtTokenOk(t *testing.T) {
 func TestSqlHandlerJwtTokenExpire(t *testing.T) {
 	setUp()
 	port := 1235
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -106,7 +106,7 @@ func TestSqlHandlerJwtTokenExpire(t *testing.T) {
 func TestSqlHandlerJwtTokenNoRole(t *testing.T) {
 	setUp()
 	port := 1236
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -132,7 +132,7 @@ func TestSqlHandlerJwtTokenNoRole(t *testing.T) {
 func TestSqlHandlerJwtTokenUnexpectedSigningMethod(t *testing.T) {
 	setUp()
 	port := 1237
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -158,7 +158,7 @@ func TestSqlHandlerJwtTokenUnexpectedSigningMethod(t *testing.T) {
 func TestSqlHandlerJwtTokenShouldBePrefixBearer(t *testing.T) {
 	setUp()
 	port := 1238
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -184,7 +184,7 @@ func TestSqlHandlerJwtTokenShouldBePrefixBearer(t *testing.T) {
 func TestSqlHandlerJwtTokenError(t *testing.T) {
 	setUp()
 	port := 1239
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -210,7 +210,7 @@ func TestSqlHandlerJwtTokenError(t *testing.T) {
 func TestSqlHandlerSQLError(t *testing.T) {
 	setUp()
 	port := 1240
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "ERROR SQL STRING"
 	body := strings.NewReader(sqlSting)
@@ -236,7 +236,7 @@ func TestSqlHandlerSQLError(t *testing.T) {
 func TestSqlHandlerErrorOnlyPost(t *testing.T) {
 	setUp()
 	port := 1241
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "ERROR SQL STRING"
 	body := strings.NewReader(sqlSting)
@@ -265,7 +265,7 @@ func TestSqlHandlerRoleManagerOk(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 	port := 1242
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -298,7 +298,7 @@ func TestSqlHandlerRoleManagerPermissionDeniedSELECT(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 	port := 1243
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)
@@ -328,7 +328,7 @@ func TestSqlHandlerRoleManagerPermissionDeniedINSERT(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (43, 'Konstantin', 'Savenkov', 15.3)")
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 	port := 1244
-	defer startServerOnPort(t, port, SQLHandler).Close()
+	defer startServerOnPort(t, port, FastHttpHandler).Close()
 
 	sqlSting := "SELECT * FROM customer"
 	body := strings.NewReader(sqlSting)

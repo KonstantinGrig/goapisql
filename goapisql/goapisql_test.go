@@ -18,7 +18,7 @@ func setUp() {
 		log.Println("dbTest == nil")
 		isFirst = true
 		os.Setenv("GOAPISQL_ENV", "test")
-		config.Init()
+		config.InitConfigFile("../config.json")
 		dbTest = config.GetDbConnection("postgres")
 	} else {
 		log.Println("dbTest not nil")
@@ -46,11 +46,11 @@ func TestGetQueryResultSelect(t *testing.T) {
 	t.Log(res)
 
 	val := "Konstantin"
-	if !strings.Contains(res, val) {
+	if !strings.Contains(string(res), val) {
 		t.Error("The string should to contains", val)
 	}
 	val = "Oksana"
-	if !strings.Contains(res, val) {
+	if !strings.Contains(string(res), val) {
 		t.Error("The string should to contains", val)
 	}
 }
@@ -65,7 +65,7 @@ func TestGetQueryResultInsert(t *testing.T) {
 	}
 	t.Log(res)
 	val := "Mironova"
-	if !strings.Contains(res, val) {
+	if !strings.Contains(string(res), val) {
 		t.Error("The string should to contains", val)
 	}
 }
