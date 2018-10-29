@@ -23,6 +23,7 @@ const (
 	KEY_JWT_SECRET      = "jwt-secret"
 	PREFIX_TOKEN        = "Bearer "
 	DB_DRIVER_NAME      = "postgres"
+	DB_ADMIN_ROLE       = "db-admin-role"
 )
 
 //Init config file from the config paths
@@ -153,4 +154,10 @@ func GetDbConnection(name string) *sql.DB {
 		cacheApp.Set(keyDbConnection, res, cache.NoExpiration)
 	}
 	return res
+}
+
+//GetDbAdminConnection retrieves *sql.DB
+//Cache use
+func GetDbAdminConnection() *sql.DB {
+	return GetDbConnection(GetString(DB_ADMIN_ROLE))
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"github.com/KonstantinGrig/goapisql/config"
 	"github.com/KonstantinGrig/goapisql/goapisql"
 	"github.com/KonstantinGrig/goapisql/jwtservice"
 	"github.com/valyala/fasthttp"
@@ -70,8 +69,7 @@ func ProcSqlRequest(authorizationHeader string, sqlString string) ([]byte, int, 
 		return nil, 403, errors.New("No role in Authorization token")
 	}
 	role := roleClaims.(string)
-	db := config.GetDbConnection(role)
-	res, err := goapisql.GetQueryResult(db, sqlString)
+	res, err := goapisql.GetQueryResult(role, sqlString)
 	if err != nil {
 		return nil, 400, err
 	}

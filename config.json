@@ -3,6 +3,7 @@
   {
     "db-uri-template": "postgres://%s:%s@localhost:5432/goapisql_db?sslmode=disable",
     "db-anon-role": "web_anon",
+    "db-admin-role": "postgres",
     "server-port": "9595",
     "jwt-secret": "G0naHHmCgbbLPoK4rdTnGhl30B3VKBkD",
     "db_users": [
@@ -24,6 +25,7 @@
   {
     "db-uri-template": "postgres://%s:%s@localhost:5433/goapisql_db_test?sslmode=disable",
     "db-anon-role": "web_anon",
+    "db-admin-role": "postgres",
     "server-port": "9595",
     "jwt-secret": "G0naHHmCgbbfgfgUUUbvlaztyrOpppQ",
     "db_users": [

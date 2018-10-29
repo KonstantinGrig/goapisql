@@ -11,6 +11,7 @@ import (
 )
 
 var dbTest *sql.DB
+var dbRole string
 
 func setUp() {
 	isFirst := false
@@ -19,7 +20,8 @@ func setUp() {
 		isFirst = true
 		os.Setenv("GOAPISQL_ENV", "test")
 		config.InitConfigFile("../config.json")
-		dbTest = config.GetDbConnection("postgres")
+		dbRole = "postgres"
+		dbTest = config.GetDbConnection(dbRole)
 	} else {
 		log.Println("dbTest not nil")
 	}
@@ -39,7 +41,7 @@ func TestGetQueryResultSelect(t *testing.T) {
 	dbTest.Exec("INSERT INTO customer (age, first_name, last_name, dimension) VALUES (35, 'Oksana', 'Savenkova', 12.5)")
 
 	sqlString := "SELECT * FROM customer"
-	res, err := GetQueryResult(dbTest, sqlString)
+	res, err := GetQueryResult(dbRole, sqlString)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -59,7 +61,7 @@ func TestGetQueryResultInsert(t *testing.T) {
 	setUp()
 
 	sqlString := "INSERT INTO customer (age, first_name, last_name, dimension) VALUES (4, 'Kira', 'Mironova', 5.8) RETURNING *"
-	res, err := GetQueryResult(dbTest, sqlString)
+	res, err := GetQueryResult(dbRole, sqlString)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -73,7 +75,7 @@ func TestGetQueryResultInsert(t *testing.T) {
 func TestGetQueryResult2(t *testing.T) {
 	setUp()
 	sqlString := ""
-	res, err := GetQueryResult(dbTest, sqlString)
+	res, err := GetQueryResult(dbRole, sqlString)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -84,7 +86,7 @@ func TestGetQueryResult2(t *testing.T) {
 func TestGetQueryResult3(t *testing.T) {
 	setUp()
 	sqlString := ""
-	res, err := GetQueryResult(dbTest, sqlString)
+	res, err := GetQueryResult(dbRole, sqlString)
 	if err != nil {
 		t.Error(err.Error())
 	}

@@ -1,12 +1,13 @@
 package goapisql
 
 import (
-	"database/sql"
 	"encoding/json"
+	"github.com/KonstantinGrig/goapisql/config"
 )
 
 //GetQueryResult retrieves JSON result from DB or error
-func GetQueryResult(db *sql.DB, sql string) ([]byte, error) {
+func GetQueryResult(role string, sql string) ([]byte, error) {
+	db := config.GetDbConnection(role)
 	tx, errBeginTx := db.Begin()
 	if errBeginTx != nil {
 		return nil, errBeginTx
