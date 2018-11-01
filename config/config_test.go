@@ -14,7 +14,6 @@ type testpair struct {
 var tests = []testpair{
 	{"db-uri-template", "postgres://%s:%s@localhost:5433/goapisql_db_test?sslmode=disable"},
 	{"db-anon-role", "web_anon"},
-	{"server-port", "9595"},
 	{"jwt-secret", "G0naHHmCgbbfgfgUUUbvlaztyrOpppQ"},
 }
 
