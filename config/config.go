@@ -3,11 +3,12 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	//Import the PostgreSQL driver
 	_ "github.com/lib/pq"
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -44,7 +45,10 @@ func GetCache() *cache.Cache {
 	isFlushCache := os.Getenv("GOAPISQL_IS_CACHE_FLUSH")
 	if isFlushCache == "yes" {
 		goapisqlCache.Flush()
-		os.Setenv("GOAPISQL_IS_CACHE_FLUSH", "no")
+		err := os.Setenv("GOAPISQL_IS_CACHE_FLUSH", "no")
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	return goapisqlCache
@@ -57,7 +61,6 @@ func GetEnv() string {
 	if envVal == "" {
 		envVal = "prod"
 	}
-	log.Println("Enviroment:", envVal)
 	return envVal
 }
 
