@@ -1,6 +1,7 @@
 package goapisql
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/KonstantinGrig/goapisql/config"
 )
@@ -25,7 +26,12 @@ func GetQueryResult(role string, sql string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		var scanValues, rowMap = getEmptyRow(columns)
+		columnTypesName, err := getColumnTypesName(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		var scanValues, rowMap = getEmptyRow(columns, columnTypesName)
 		err = rows.Scan(scanValues...)
 		if err != nil {
 			return nil, err
@@ -47,13 +53,32 @@ func GetQueryResult(role string, sql string) ([]byte, error) {
 	return resByte, nil
 }
 
-func getEmptyRow(sliceFieldNames []string) ([]interface{}, map[string]interface{}) {
+func getColumnTypesName(rows *sql.Rows) ([]string, error) {
+	columnTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
+	var columnTypesName []string
+	for i := 0; i < len(columnTypes); i++ {
+		columnTypesName = append(columnTypesName, columnTypes[i].DatabaseTypeName())
+	}
+	return columnTypesName, err
+}
+
+func getEmptyRow(sliceFieldNames []string, columnTypesName []string) ([]interface{}, map[string]interface{}) {
 	var sliceFieldValues []interface{}
 	var resultMap = make(map[string]interface{})
-	for _, fieldName := range sliceFieldNames {
-		var fieldValue interface{}
-		sliceFieldValues = append(sliceFieldValues, &fieldValue)
-		resultMap[fieldName] = &fieldValue
+	for i, fieldName := range sliceFieldNames {
+		switch columnTypesName[i] {
+		case "":
+			var fieldValue string
+			sliceFieldValues = append(sliceFieldValues, &fieldValue)
+			resultMap[fieldName] = &fieldValue
+		default:
+			var fieldValue interface{}
+			sliceFieldValues = append(sliceFieldValues, &fieldValue)
+			resultMap[fieldName] = &fieldValue
+		}
 	}
 	return sliceFieldValues, resultMap
 }

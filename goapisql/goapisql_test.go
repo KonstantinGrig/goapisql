@@ -45,13 +45,17 @@ func TestGetQueryResultSelect(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	t.Log(res)
+	t.Log(string(res))
 
 	val := "Konstantin"
 	if !strings.Contains(string(res), val) {
 		t.Error("The string should to contains", val)
 	}
 	val = "Oksana"
+	if !strings.Contains(string(res), val) {
+		t.Error("The string should to contains", val)
+	}
+	val = "user_role"
 	if !strings.Contains(string(res), val) {
 		t.Error("The string should to contains", val)
 	}
@@ -96,7 +100,7 @@ func TestGetQueryResult3(t *testing.T) {
 
 func dropTable(tableName string) {
 	dbTest := config.GetDbConnection("postgres")
-	sqlStatement := fmt.Sprintf(`DROP TABLE IF EXISTS %s;`, tableName)
+	sqlStatement := fmt.Sprintf(`DROP TABLE IF EXISTS %s; DROP TYPE IF EXISTS role_db_enum;`, tableName)
 	_, err := dbTest.Exec(sqlStatement)
 	if err != nil {
 		panic(err)
@@ -106,12 +110,14 @@ func dropTable(tableName string) {
 func createTableCustomer() {
 	dbTest := config.GetDbConnection("postgres")
 	sqlStatement := `
+CREATE TYPE role_db_enum AS ENUM ('admin_role', 'manager_role', 'user_role');
 CREATE TABLE customer (
   id SERIAL PRIMARY KEY,
   age INT,
   dimension real,
   first_name TEXT,
-  last_name TEXT
+  last_name TEXT,
+  role_db role_db_enum DEFAULT 'user_role'
 );
 `
 	_, err := dbTest.Exec(sqlStatement)
